@@ -1,0 +1,4 @@
+---
+- name: Restart Nessus
+  service: name=nessusd state=restarted
+  when: nessus_manage

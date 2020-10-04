@@ -1,0 +1,52 @@
+---
+# - name: 0. Check if lock dpkg
+#   file:
+#     state: absent
+#     path: "{{ item }}"
+#   become: true
+#   with_items:
+#     - /var/lib/dpkg/lock-frontend
+#     - /var/lib/dpkg/lock
+#   tags: apt
+
+# - name: 3. Open Nessus Ports
+#   ufw:
+#     rule: allow
+#     port: 8834,80,443
+#     proto: tcp
+#   tags:
+#     - open_consul_ports
+
+# - name: 4. Enable Everything allow with UFW
+#   ufw:
+#     state: enabled
+#     policy: allow
+#   tags:
+#     - Open_Ports
+
+- name: 1. Check Update OS
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  tags:
+    - update_os
+
+- name: 2. Download Nessus Manager File
+  get_url:
+    url: "{{ nessus_manager_download_url }}"
+    dest: "{{ server_install_directory }}"
+  tags:
+    - nessus_download_file
+
+- name: 3. Installa Nessus NessusManager
+  command: dpkg -i "{{ server_install_directory }}/{{ nessus_manager_filename }}"
+  tags:
+    - nessus_install
+
+- name: 4. Enable Nessus Manager
+  systemd:
+    name: nessusd
+    state: started
+    enabled: yes
+  tags:
+    - enable-services
